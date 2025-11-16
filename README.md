@@ -51,6 +51,7 @@ pip install -r requirements.txt
 
 The primary entry point for the entire pipeline is `demo.py`. Here is the file structure represented in a tree format, showing the directories and the files.
 
+```
 RNA_tools
 ├── demo.py
 ├── create_rna_data.py
@@ -74,6 +75,7 @@ RNA_tools
     │   └── RNA_structure_A_structure_arc_plot.png
     └── output_new_RNA_2.pdb/
         └── ... (Analysis files for other candidates)
+```
 
 ### Running the Demo
 
