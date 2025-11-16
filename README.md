@@ -29,7 +29,7 @@ You need to have Python installed. The scripts rely on external libraries and to
   * **Biopython**: Used for parsing PDB/CIF files.
   * **Selenium**: Used to automate web interactions with RNAComposer and Mol\*Star.
   * **Matplotlib**: Used for 2D arc plot visualization.
-  * **Web Browser**: Chrome is used by the scripts. You need to have the appropriate **WebDriver** installed and accessible in your system's PATH.
+  * **Requests**: Used with Selenium for web interactions.
 
 ### Install Python Dependencies
 
@@ -49,7 +49,31 @@ pip install -r requirements.txt
 
 ## 🚀 Usage
 
-The primary entry point for the entire pipeline is `demo.py`.
+The primary entry point for the entire pipeline is `demo.py`. Here is the file structure represented in a tree format, showing the directories and the files.
+
+RNA_tools
+├── demo.py
+├── create_rna_data.py
+├── process_rna_data.py
+├── rna_visualizer.py
+|
+├── designed_sequences/
+│   ├── z_tile_tetramer_cand1.txt
+│   ├── z_tile_tetramer_cand2.txt
+│   └── ...
+|
+├── pdb_files/
+│   ├── new_RNA_1.pdb    (Example file mentioned in process_rna_data.py)
+│   ├── new_RNA_2.pdb
+│   └── ...
+|
+└── MFE_test/
+    ├── output_new_RNA_1.pdb/
+    │   ├── RNA_structure_A_sequence.txt
+    │   ├── RNA_structure_A_secondary_structure.txt
+    │   └── RNA_structure_A_structure_arc_plot.png
+    └── output_new_RNA_2.pdb/
+        └── ... (Analysis files for other candidates)
 
 ### Running the Demo
 
