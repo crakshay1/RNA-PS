@@ -3,3 +3,10 @@ conv.json
 /rna_tools/designed_sequences
 
 *.pyc
+
+*.png
+*.ps
+*.eps
+*.fa
+*.pdb
+*.txt

@@ -3,7 +3,7 @@ import os
 import subprocess
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-from Bio.PDB import MMCIFParser
+from Bio.PDB import MMCIFParser, PDBParser
 from Bio.PDB.PDBExceptions import PDBException
 import RNA 
 
@@ -35,22 +35,42 @@ def plot_arc_diagram(ss, sequence, output_png_path):
     plt.savefig(output_png_path)
     plt.close()
 
-def process_cif_file(cif_file_path, output_dir="output"):
+def process_structure_file(file_path, output_dir="output"):
     """
-    Parses a .cif file, predicts secondary structure, saves the data, and generates a visualization.
+    Parses a .cif or .pdb file, predicts secondary structure, saves the data, and generates a visualization.
+
+    Args:
+        file_path (str): Path to PDB or CIF structure file
+        output_dir (str): Directory to save output files (default: "output")
+
+    Example usage:
+        process_structure_file("Predict.pdb")
+        process_structure_file("structure.cif", "my_results")
     """
-    if not os.path.exists(cif_file_path):
-        print(f"Error: File not found at {cif_file_path}")
+    if not os.path.exists(file_path):
+        print(f"Error: File not found at {file_path}")
         return
 
-    parser = MMCIFParser()
+    # Determine file type and choose appropriate parser
+    file_extension = file_path.lower().split('.')[-1]
+
+    if file_extension == 'cif':
+        parser = MMCIFParser()
+        print(f"Using MMCIFParser for {file_path}")
+    elif file_extension == 'pdb':
+        parser = PDBParser()
+        print(f"Using PDBParser for {file_path}")
+    else:
+        print(f"Error: Unsupported file format '{file_extension}'. Only .cif and .pdb files are supported.")
+        return
+
     try:
-        structure = parser.get_structure("RNA_structure", cif_file_path)
+        structure = parser.get_structure("RNA_structure", file_path)
     except PDBException as e:
-        print(f"Error parsing {cif_file_path}: {e}")
+        print(f"Error parsing {file_path}: {e}")
         return
 
-    print(f"Successfully parsed {cif_file_path}")
+    print(f"Successfully parsed {file_path}")
     print(f"Structure ID: {structure.id}")
 
     os.makedirs(output_dir, exist_ok=True)
@@ -98,16 +118,60 @@ def process_cif_file(cif_file_path, output_dir="output"):
         except Exception as e:
             print(f"An unexpected error occurred during visualization: {e}")
 
+# Legacy function for backward compatibility
+def process_cif_file(cif_file_path, output_dir="output"):
+    """
+    Legacy function - use process_structure_file() instead.
+    Parses a .cif file, predicts secondary structure, saves the data, and generates a visualization.
+    """
+    return process_structure_file(cif_file_path, output_dir)
+
+def process_pdb_file(pdb_file_path, output_dir="output2"):
+    """
+    Parses a .pdb file, predicts secondary structure, saves the data, and generates a visualization.
+    """
+    return process_structure_file(pdb_file_path, output_dir)
 
 if __name__ == "__main__":
 
-    example_cif_file = "code/databases/rna3db-mmcifs/train_set/component_1/1c2w_B/1c2w_B.cif"
-    
+    import sys
+
+    # Check for command line arguments
+    if len(sys.argv) > 1:
+        input_file = sys.argv[1]
+        output_dir = sys.argv[2] if len(sys.argv) > 2 else "output"
+    else:
+        # Default example files - try PDB first, then CIF as fallback
+        example_pdb_file = "Predict.pdb"
+        example_cif_file = "/home/paul/Documents/EurotechBioHack/code/databases/rna3db-mmcifs/train_set/component_1/1c2w_B/1c2w_B.cif"
+
+        # Use PDB file if it exists, otherwise fall back to CIF
+        if os.path.exists(example_pdb_file):
+            input_file = example_pdb_file
+            print(f"Using default PDB file: {example_pdb_file}")
+        elif os.path.exists(example_cif_file):
+            input_file = example_cif_file
+            print(f"PDB file not found, using default CIF file: {example_cif_file}")
+        else:
+            print("Error: No default example files found.")
+            print(f"Please provide a PDB or CIF file as argument:")
+            print(f"  python {sys.argv[0]} your_structure.pdb")
+            print(f"  python {sys.argv[0]} your_structure.cif")
+            sys.exit(1)
+
+        output_dir = "output"
+
     try:
         import Bio
         import RNA
         import matplotlib
     except ImportError:
-        print("Required libraries (biopython, viennarna, matplotlib) are not installed. Please install them using '.venv/bin/pip install biopython viennarna matplotlib'")
+        print("Required libraries (biopython, viennarna, matplotlib) are not installed.")
+        print("Please install them using: .venv/bin/pip install biopython viennarna matplotlib")
     else:
-        process_cif_file(example_cif_file)
+        print(f"Processing file: {input_file}")
+        print(f"Output directory: {output_dir}")
+        print("=" * 50)
+
+        # Use the unified function that handles both PDB and CIF
+        process_structure_file(input_file, output_dir)
