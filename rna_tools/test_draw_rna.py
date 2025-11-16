@@ -1,7 +1,6 @@
 
 import os
 from draw_rna import draw
-from generate_rna import scaffold
 
 def test_draw_rna():
     sequence = "GGGGAAAACCCC"
@@ -14,8 +13,6 @@ def test_draw_rna():
     except Exception as e:
         print(f"Error generating test visualization: {e}")
 
-def test_draw_scaffold():
-    
 
 if __name__ == "__main__":
     test_draw_rna()
