@@ -31,7 +31,7 @@ You need to have Python installed. The scripts rely on external libraries and to
   * **Matplotlib**: Used for 2D arc plot visualization.
   * **Web Browser**: Chrome is used by the scripts. You need to have the appropriate **WebDriver** installed and accessible in your system's PATH.
 
-### 1\. Install Python Dependencies
+### Install Python Dependencies
 
 It is highly recommended to use a virtual environment.
 
@@ -46,10 +46,6 @@ source .venv/bin/activate  # On Linux/macOS
 # Install the required libraries
 pip install -r requirements.txt
 ```
-
-### 2\. Set up ChromeDriver
-
-Download the correct version of **[ChromeDriver](https://googlechromelabs.github.io/chrome-for-testing/)** that matches your installed Chrome browser. You must place the `chromedriver` executable in a directory that is included in your system's **PATH** environment variable.
 
 ## 🚀 Usage
 
@@ -71,7 +67,7 @@ python demo.py
 1.  **Scaffold Selection**: A GUI prompt (via `easygui`) will ask you to select a target secondary structure scaffold (e.g., `z_tile_tetramer`, `tetrahedron_wireframe`, etc.).
 2.  **Candidate Generation**: The script will prompt for the number of candidates to generate.
 3.  **Inverse Folding**: `create_rna_data.py` designs multiple sequences that fit the target scaffold and the stabilizing motifs (GNRA, UUCG, Kissing Loops).
-4.  **3D Modeling (RNAComposer)**: Each designed sequence and predicted structure is submitted to the **RNAComposer** web server. This step is time-consuming (due to a required 35-second waiting period per candidate) and requires a live internet connection. The resulting PDB files are saved in the `pdb_files/` directory.
+4.  **3D Modeling (RNAComposer)**: Each designed sequence and predicted structure is submitted to the **RNAComposer** web server. This step is time-consuming (due to a required 35-second waiting period per candidate) because it requires a live internet connection. The resulting PDB files are saved in the `pdb_files/` directory.
 5.  **Analysis**: `process_rna_data.py` reads the generated PDB files, calculates their actual MFE and secondary structure, and saves the data.
 6.  **Selection**: The candidate with the lowest (most negative) MFE is identified as the most stable design.
 7.  **Visualization**: The most stable structure is opened in a **Mol\*Star** web viewer for interactive 3D inspection.
