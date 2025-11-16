@@ -1,0 +1,7 @@
+easygui
+selenium
+gemmi
+requests
+matplotlib
+biopython
+ViennaRNA
