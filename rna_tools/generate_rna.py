@@ -269,6 +269,8 @@ def generate_candidates_for_scaffold(
     scaffold_name: str,
     n_candidates: int = 5,
     rng_seed: int = 42,
+    mfe_threshold: float = None,
+    mfe_percentile: float = None,
 ):
     """
     Full pipeline for one scaffold:
@@ -277,7 +279,17 @@ def generate_candidates_for_scaffold(
       - sample motif configuration
       - convert motifs -> constraints
       - run inverse folding multiple times
-    Returns a list of dicts with sequence, structure, mfe, etc.
+      - filter by MFE criteria
+
+    Args:
+        scaffold_name: Name of scaffold to use
+        n_candidates: Final number of candidates to return
+        rng_seed: Random seed for reproducibility
+        mfe_threshold: Keep only candidates with MFE <= threshold (e.g. -10.0)
+        mfe_percentile: Keep only bottom X% of MFE values (e.g. 20)
+
+    Returns:
+        List of filtered candidate dicts with sequence, structure, mfe, etc.
     """
     rng = random.Random(rng_seed)
     db = scaffold[scaffold_name]
@@ -314,15 +326,87 @@ def generate_candidates_for_scaffold(
     # sort by base-pair distance, then by MFE (more negative = better)
     candidates.sort(key=lambda c: (c["bp_distance"], c["mfe"]))
 
+    # Apply MFE filtering if specified
+    if mfe_threshold is not None or mfe_percentile is not None:
+        print(f"Before MFE filtering: {len(candidates)} candidates")
+        if candidates:
+            stats = get_mfe_statistics(candidates)
+            print(f"MFE range: {stats['min_mfe']:.2f} to {stats['max_mfe']:.2f}, mean: {stats['mean_mfe']:.2f}")
+
+        candidates = filter_candidates_by_mfe(
+            candidates,
+            mfe_threshold=mfe_threshold,
+            percentile=mfe_percentile,
+            min_candidates=1
+        )
+        print(f"After MFE filtering: {len(candidates)} candidates")
+
     return candidates[:n_candidates]
 
 
 # =========================
-# 8. Save generated candidates
+# 8. MFE filtering functions
+# =========================
+
+def filter_candidates_by_mfe(candidates, mfe_threshold=None, percentile=None, min_candidates=1):
+    """
+    Filter candidates based on MFE criteria.
+    """
+    if not candidates:
+        return candidates
+
+    filtered = candidates.copy()
+
+    if mfe_threshold is not None:
+        filtered = [c for c in filtered if c["mfe"] <= mfe_threshold]
+
+    if percentile is not None:
+        if not filtered:
+            filtered = candidates.copy()
+
+        filtered.sort(key=lambda c: c["mfe"])
+
+        n_keep = max(min_candidates, int(len(filtered) * percentile / 100)) # garde le percentile définit
+        filtered = filtered[:n_keep]
+
+    if len(filtered) < min_candidates and len(candidates) >= min_candidates:
+        candidates_sorted = sorted(candidates, key=lambda c: c["mfe"])
+        filtered = candidates_sorted[:min_candidates]
+
+    return filtered
+
+def get_mfe_statistics(candidates):
+    """
+    Calculate MFE statistics for a list of candidates.
+
+    Returns:
+        Dictionary with min, max, mean, median MFE values
+    """
+    if not candidates:
+        return {}
+
+    mfe_values = [c["mfe"] for c in candidates]
+    mfe_values.sort()
+
+    n = len(mfe_values)
+    median = mfe_values[n//2] if n % 2 == 1 else (mfe_values[n//2-1] + mfe_values[n//2]) / 2
+
+    return {
+        "min_mfe": min(mfe_values),
+        "max_mfe": max(mfe_values),
+        "mean_mfe": sum(mfe_values) / len(mfe_values),
+        "median_mfe": median,
+        "count": n
+    }
+
+# =========================
+# 9. Save generated candidates
 # =========================
 
 def save_candidates(scaffold_name, candidates, out_dir="designed_sequences"):
     os.makedirs(out_dir, exist_ok=True)
+
+    # Save individual candidate files
     for i, c in enumerate(candidates):
         base = f"{scaffold_name}_cand{i+1}"
         txt_path = os.path.join(out_dir, base + ".txt")
@@ -331,5 +415,20 @@ def save_candidates(scaffold_name, candidates, out_dir="designed_sequences"):
             f.write(f"Sequence: {c['sequence']}\n")
             f.write(f"Target_SS: {c['target_ss']}\n")
             f.write(f"Predicted_SS: {c['predicted_ss']}\n")
-            f.write(f"MFE: {c['mfe']}\n")
+            f.write(f"MFE: {c['mfe']:.2f}\n")
             f.write(f"BP_distance: {c['bp_distance']}\n")
+
+    # Save summary with MFE statistics
+    if candidates:
+        stats = get_mfe_statistics(candidates)
+        summary_path = os.path.join(out_dir, f"{scaffold_name}_summary.txt")
+        with open(summary_path, "w") as f:
+            f.write(f"=== MFE Summary for {scaffold_name} ===\n")
+            f.write(f"Total candidates: {stats['count']}\n")
+            f.write(f"MFE range: {stats['min_mfe']:.2f} to {stats['max_mfe']:.2f}\n")
+            f.write(f"Mean MFE: {stats['mean_mfe']:.2f}\n")
+            f.write(f"Median MFE: {stats['median_mfe']:.2f}\n\n")
+            f.write("=== Best candidates (sorted by MFE) ===\n")
+            sorted_candidates = sorted(candidates, key=lambda c: c['mfe'])
+            for i, c in enumerate(sorted_candidates[:10]):  # Show top 10
+                f.write(f"{i+1}. MFE: {c['mfe']:.2f}, BP_dist: {c['bp_distance']}, Seq: {c['sequence'][:30]}...\n")

@@ -1,1 +1,5 @@
 /databases
+conv.json
+/rna_tools/designed_sequences
+
+*.pyc

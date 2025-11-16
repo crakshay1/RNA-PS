@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from Bio.PDB import MMCIFParser
 from Bio.PDB.PDBExceptions import PDBException
-import RNA # Import ViennaRNA
+import RNA 
 
 def plot_arc_diagram(ss, sequence, output_png_path):
     """
