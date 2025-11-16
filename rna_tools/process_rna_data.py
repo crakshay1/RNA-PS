@@ -104,10 +104,13 @@ def process_structure_file(file_path, output_dir="output"):
         print(f"Sequence saved to {sequence_output_path}")
 
         structure_output_path = os.path.join(output_dir, f"{structure.id}_{chain.id}_secondary_structure.txt")
+        os.makedirs("analysis", exist_ok=True)
         with open(structure_output_path, "w") as f:
-            f.write(f"Sequence: {sequence}\n")
-            f.write(f"Secondary Structure: {ss}\n")
-            f.write(f"MFE: {energy:.2f}\n")
+            with open("analysis/energy.txt", "a") as e:
+                f.write(f"Sequence: {sequence}\n")
+                f.write(f"Secondary Structure: {ss}\n")
+                f.write(f"MFE: {energy:.2f}\n")
+                e.write(f"{energy:.2f}\n")
         print(f"Secondary structure and MFE saved to {structure_output_path}")
 
         print("Generating visualization...")
@@ -142,7 +145,7 @@ if __name__ == "__main__":
         output_dir = sys.argv[2] if len(sys.argv) > 2 else "output"
     else:
         # Default example files - try PDB first, then CIF as fallback
-        example_pdb_file = "Predict.pdb"
+        example_pdb_file = "pdb_files/new_RNA_1.pdb"
         example_cif_file = "/home/paul/Documents/EurotechBioHack/code/databases/rna3db-mmcifs/train_set/component_1/1c2w_B/1c2w_B.cif"
 
         # Use PDB file if it exists, otherwise fall back to CIF
