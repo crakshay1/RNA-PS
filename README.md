@@ -1,4 +1,4 @@
-# 🧬 RNA Nanostructure Designer
+# 🧬 RNA Parcel Service : Predicting and Designing RNA Nanocages
 
 This repository contains a set of Python scripts designed to automate the process of designing custom RNA nanocages based on desired secondary structure scaffolds. It combines sequence design using **ViennaRNA**, 3D structure prediction using **RNAComposer** (via a Selenium web driver interface), and analysis/visualization using **Biopython** and **Matplotlib**.
 
