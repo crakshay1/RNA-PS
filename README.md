@@ -6,6 +6,8 @@ This repository contains a set of Python scripts designed to automate the proces
 
 The pipeline aims to generate stable RNA sequences that fold into specific target secondary structures (scaffolds) decorated with stabilizing motifs (GNRA, UUCG tetraloops, and Kissing Loops).
 
+![alt text](https://github.com/crakshay1/RNA-PS/blob/main/demo.gif)  
+
 ### Key Components
 
 1.  **`create_rna_data.py`**: Handles the sequence design and 3D structure prediction.
